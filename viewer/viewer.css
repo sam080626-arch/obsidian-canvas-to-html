@@ -287,6 +287,14 @@ html, body {
   text-decoration: underline dotted var(--cv-faint);
   cursor: help;
 }
+/* MathJax's own web fonts are stripped to keep the file self-contained, so its
+   output falls back to whatever maths font the reader has. */
+.cv-card-body mjx-container {
+  font-family: "Latin Modern Math", "STIX Two Math", "XITS Math", "Cambria Math",
+    "Times New Roman", serif;
+}
+.cv-card-body mjx-container[display="true"] { display: block; margin: var(--cv-p-spacing) 0; overflow-x: auto; }
+
 .cv-card-body .cv-math-source {
   color: var(--cv-muted);
   font-style: italic;

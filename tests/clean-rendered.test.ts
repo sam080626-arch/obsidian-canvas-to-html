@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi } from "vitest";
-import { cleanRendered, hasPendingAsyncContent } from "../clean-rendered";
+import { cleanRendered, hasPendingAsyncContent, reattachRenderedMath } from "../clean-rendered";
 
 function host(html: string): HTMLElement {
   const el = document.createElement("div");
@@ -179,5 +179,97 @@ describe("cleanRendered — images", () => {
     await cleanRendered(el, noEmbeds);
     expect(el.innerHTML).not.toContain("onclick");
     expect(el.innerHTML).not.toContain("onerror");
+  });
+});
+
+describe("reattachRenderedMath", () => {
+  function pair(sourceHtml: string, targetHtml: string) {
+    return [host(sourceHtml), host(targetHtml)] as const;
+  }
+
+  it("carries MathJax output across sanitization", () => {
+    const [src, dst] = pair(
+      '<span class="math"><mjx-container class="MathJax"><mjx-math><mjx-mi>x</mjx-mi></mjx-math></mjx-container></span>',
+      '<span class="math"></span>',
+    );
+    expect(reattachRenderedMath(src, dst)).toBe(1);
+    expect(dst.querySelector("mjx-container")).not.toBeNull();
+    expect(dst.textContent).toBe("x");
+  });
+
+  it("pairs formulas by position", () => {
+    const [src, dst] = pair(
+      '<span class="math"><mjx-container>one</mjx-container></span>' +
+        '<span class="math"><mjx-container>two</mjx-container></span>',
+      '<span class="math"></span><span class="math"></span>',
+    );
+    reattachRenderedMath(src, dst);
+    const spans = dst.querySelectorAll(".math");
+    expect(spans[0].textContent).toBe("one");
+    expect(spans[1].textContent).toBe("two");
+  });
+
+  it("leaves a target that already has content alone", () => {
+    const [src, dst] = pair(
+      '<span class="math"><mjx-container>new</mjx-container></span>',
+      '<span class="math">existing</span>',
+    );
+    expect(reattachRenderedMath(src, dst)).toBe(0);
+    expect(dst.textContent).toBe("existing");
+  });
+
+  it("does nothing when the source never rendered", () => {
+    const [src, dst] = pair('<span class="math"></span>', '<span class="math"></span>');
+    expect(reattachRenderedMath(src, dst)).toBe(0);
+  });
+
+  it("keeps SVG-mode math", () => {
+    const [src, dst] = pair(
+      '<span class="math"><mjx-container><svg viewBox="0 0 10 10"><path d="M0 0"></path></svg></mjx-container></span>',
+      '<span class="math"></span>',
+    );
+    reattachRenderedMath(src, dst);
+    expect(dst.querySelector("svg path")?.getAttribute("d")).toBe("M0 0");
+    expect(dst.querySelector("svg")?.getAttribute("viewBox")).toBe("0 0 10 10");
+  });
+
+  it("drops a script smuggled inside the math subtree", () => {
+    const [src, dst] = pair(
+      '<span class="math"><mjx-container><script>steal()</script><mjx-mi>x</mjx-mi></mjx-container></span>',
+      '<span class="math"></span>',
+    );
+    reattachRenderedMath(src, dst);
+    expect(dst.querySelector("script")).toBeNull();
+    expect(dst.innerHTML).not.toContain("steal()");
+    expect(dst.textContent).toBe("x");
+  });
+
+  it("strips event handlers and url() styles from math output", () => {
+    const [src, dst] = pair(
+      '<span class="math"><mjx-container onclick="steal()" style="background:url(https://x.test/a.png)">' +
+        "<mjx-mi>x</mjx-mi></mjx-container></span>",
+      '<span class="math"></span>',
+    );
+    reattachRenderedMath(src, dst);
+    expect(dst.innerHTML).not.toContain("onclick");
+    expect(dst.innerHTML).not.toContain("url(");
+  });
+
+  it("keeps MathJax's own inline sizing styles", () => {
+    const [src, dst] = pair(
+      '<span class="math"><mjx-container style="font-size: 116%"><mjx-mi>x</mjx-mi></mjx-container></span>',
+      '<span class="math"></span>',
+    );
+    reattachRenderedMath(src, dst);
+    expect(dst.querySelector("mjx-container")?.getAttribute("style")).toBe("font-size: 116%");
+  });
+
+  it("removes a disallowed element such as an iframe", () => {
+    const [src, dst] = pair(
+      '<span class="math"><mjx-container><iframe src="https://x.test"></iframe><mjx-mi>x</mjx-mi></mjx-container></span>',
+      '<span class="math"></span>',
+    );
+    reattachRenderedMath(src, dst);
+    expect(dst.querySelector("iframe")).toBeNull();
   });
 });

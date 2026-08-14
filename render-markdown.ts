@@ -6,7 +6,7 @@ import {
   sanitizeHTMLToDom,
 } from "obsidian";
 import type { App } from "obsidian";
-import { cleanRendered, hasPendingAsyncContent } from "./clean-rendered";
+import { cleanRendered, hasPendingAsyncContent, reattachRenderedMath } from "./clean-rendered";
 import { extractMathSources, sanitizeMathJaxCss } from "./math";
 import type { RendererLike } from "./resolve";
 
@@ -91,6 +91,10 @@ export function createObsidianRenderer(
         const safe = sanitizeHTMLToDom(host.innerHTML);
         const wrapper = document.createElement("div");
         wrapper.appendChild(safe);
+
+        // Obsidian's sanitizer drops MathJax's custom elements, so rendered math
+        // is carried over from the host separately, under its own allowlist.
+        reattachRenderedMath(host, wrapper);
         collect.warnings.push(
           ...(await cleanRendered(wrapper, {
             resolveEmbed: (linktext) => embeds.resolveEmbed(linktext, sourcePath),
