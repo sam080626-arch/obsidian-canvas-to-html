@@ -18,6 +18,23 @@ const WHEEL_ZOOM_RATE = 0.0015;
 const BUTTON_ZOOM_STEP = 1.25;
 const THEME_KEY = "cv-theme";
 
+/**
+ * The card body under `target` that can still absorb `deltaY`, or null when the
+ * wheel should pan the canvas instead.
+ */
+function scrollableAncestor(target: EventTarget | null, deltaY: number): HTMLElement | null {
+  const start = target as HTMLElement | null;
+  const card = start?.closest?.(".cv-scrollable");
+  if (!card) return null;
+  const body = card.querySelector(".cv-card-body") as HTMLElement | null;
+  if (!body) return null;
+  const max = body.scrollHeight - body.clientHeight;
+  if (max <= 0) return null;
+  if (deltaY > 0 && body.scrollTop >= max - 0.5) return null;
+  if (deltaY < 0 && body.scrollTop <= 0.5) return null;
+  return body;
+}
+
 export function initViewer(root: Document): { getView: () => View; destroy: () => void } {
   const metaEl = root.getElementById("cv-meta");
   const meta: Meta = JSON.parse(metaEl?.textContent ?? "{}");
@@ -55,9 +72,14 @@ export function initViewer(root: Document): { getView: () => View; destroy: () =
     event.preventDefault();
     if (event.ctrlKey || event.metaKey) {
       setView(zoomAt(view, event.clientX, event.clientY, Math.exp(-event.deltaY * WHEEL_ZOOM_RATE)));
-    } else {
-      setView(panBy(view, -event.deltaX, -event.deltaY));
+      return;
     }
+    const scrollable = scrollableAncestor(event.target, event.deltaY);
+    if (scrollable) {
+      scrollable.scrollTop += event.deltaY;
+      return;
+    }
+    setView(panBy(view, -event.deltaX, -event.deltaY));
   }
 
   function onPointerDown(event: PointerEvent): void {
