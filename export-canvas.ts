@@ -17,6 +17,11 @@ export interface ExportOptions {
    * not per card.
    */
   collectedWarnings?: string[];
+  /**
+   * CSS the renderer appends while nodes are resolved (currently MathJax's
+   * generated stylesheet), folded into the exported document's <style>.
+   */
+  collectedCss?: string[];
 }
 
 export interface ExportResult {
@@ -64,7 +69,7 @@ export async function exportCanvas(
     bounds: scene.bounds,
     nodes,
     edges,
-    css: options.css,
+    css: [options.css, ...new Set(options.collectedCss ?? [])].join("\n"),
     js: options.js,
     warnings,
     defaultTheme: options.defaultTheme,

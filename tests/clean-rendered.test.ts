@@ -98,6 +98,22 @@ describe("cleanRendered — dead app UI", () => {
     expect(warnings.join()).toMatch(/math/i);
   });
 
+  it("falls back to the TeX source for an unrendered formula", async () => {
+    const el = host('<p>a<span class="math math-inline"></span>b</p>');
+    await cleanRendered(el, { ...noEmbeds, mathSources: ["e^{i\\pi}"] });
+    expect(el.querySelector(".cv-math-source")?.textContent).toBe("e^{i\\pi}");
+  });
+
+  it("matches fallbacks to formulas by position, skipping rendered ones", async () => {
+    const el = host(
+      '<span class="math"><mjx-container>ok</mjx-container></span>' +
+        '<span class="math math-block"></span>',
+    );
+    await cleanRendered(el, { ...noEmbeds, mathSources: ["first", "second"] });
+    // The first formula rendered; the fallback must be the *second* source.
+    expect(el.querySelector(".cv-math-source")?.textContent).toBe("second");
+  });
+
   it("keeps rendered math untouched", async () => {
     const el = host('<span class="math"><mjx-container>rendered</mjx-container></span>');
     await cleanRendered(el, noEmbeds);

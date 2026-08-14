@@ -26,8 +26,10 @@ here are bugs, not taste.
 - [ ] Every card opens scrolled to the top of its content.
 - [ ] Code blocks keep their syntax colouring.
 - [ ] An image embedded *inside* a note (`![[Chart.png]]`) appears in the export.
-- [ ] Math renders; if it does not, the Notice reports it and the source is shown
-      rather than a blank gap.
+- [ ] Math renders. If it does not, the TeX source appears as inline code and the
+      Notice says so — a formula must never leave a blank gap.
+- [ ] With math on the canvas, the export still makes zero network requests
+      (MathJax font URLs are stripped, so math uses fallback fonts).
 
 - [ ] Headings, lists, tables, blockquotes, and inline code match Obsidian closely.
 - [ ] Task checkboxes render checked/unchecked correctly.

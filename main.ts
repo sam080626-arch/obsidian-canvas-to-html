@@ -138,6 +138,7 @@ export default class CanvasToHtmlPlugin extends Plugin {
       // Warnings raised while rendering markdown are collected here and merged
       // with the ones exportCanvas returns.
       const renderWarnings: string[] = [];
+      const renderCss: string[] = [];
       const { html, warnings } = await exportCanvas(
         json,
         file.basename,
@@ -147,7 +148,7 @@ export default class CanvasToHtmlPlugin extends Plugin {
             this.app,
             component,
             this.buildEmbedResolver(file, images, assetCache),
-            renderWarnings,
+            { warnings: renderWarnings, css: renderCss },
           ),
           images,
           maxImageDimension: this.settings.maxImageDimension,
@@ -157,6 +158,7 @@ export default class CanvasToHtmlPlugin extends Plugin {
           js: __VIEWER_JS__,
           defaultTheme: this.settings.defaultTheme,
           collectedWarnings: renderWarnings,
+          collectedCss: renderCss,
         },
       );
 

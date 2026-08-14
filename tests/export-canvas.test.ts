@@ -98,6 +98,27 @@ describe("exportCanvas", () => {
     expect(html).toContain("math did not render");
   });
 
+  it("folds collected CSS into the document's stylesheet, once", async () => {
+    const collected: string[] = [];
+    const styled: ResolveDeps = {
+      ...deps,
+      renderer: {
+        async renderMarkdown(md: string) {
+          collected.push("mjx-container {line-height: 0}");
+          return `<p>${md}</p>`;
+        },
+      },
+    };
+    const { html } = await exportCanvas(canvasJson, "Plan", styled, {
+      ...options,
+      collectedCss: collected,
+    });
+    expect(html).toContain("mjx-container {line-height: 0}");
+    // Both cards contributed the same stylesheet; it must appear only once.
+    expect(html.match(/mjx-container \{line-height: 0\}/g)).toHaveLength(1);
+    expect(html).toContain("/*css*/");
+  });
+
   it("propagates a parse error", async () => {
     await expect(exportCanvas("{broken", "T", deps, options)).rejects.toThrow(
       /not valid JSON/,

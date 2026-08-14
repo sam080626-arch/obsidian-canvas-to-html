@@ -13,6 +13,11 @@
 export interface CleanOptions {
   /** Resolve an embed's link text (e.g. "Chart.png") to a data URI, or null. */
   resolveEmbed(linktext: string): Promise<string | null>;
+  /**
+   * TeX sources in document order, used when MathJax has not typeset a formula.
+   * Indexed against every `.math` element, rendered or not, so positions line up.
+   */
+  mathSources?: string[];
 }
 
 /** Selectors whose emptiness means an async sub-renderer has not finished. */
@@ -72,12 +77,14 @@ function removeDeadChrome(root: ParentNode, warnings: string[]): void {
   root.querySelectorAll("script, style, iframe, object, embed").forEach((el) => el.remove());
 }
 
-function resolveMath(root: ParentNode, warnings: string[]): void {
+function resolveMath(root: ParentNode, warnings: string[], sources: string[]): void {
   let unrendered = 0;
-  for (const el of Array.from(root.querySelectorAll(".math"))) {
+  const elements = Array.from(root.querySelectorAll(".math"));
+  for (let i = 0; i < elements.length; i += 1) {
+    const el = elements[i];
     if (el.children.length > 0 || el.textContent?.trim()) continue;
     unrendered += 1;
-    const tex = el.getAttribute("data-tex") ?? el.getAttribute("data-expr");
+    const tex = el.getAttribute("data-tex") ?? el.getAttribute("data-expr") ?? sources[i];
     if (tex) {
       const code = el.ownerDocument.createElement("code");
       code.className = "cv-math-source";
@@ -88,7 +95,11 @@ function resolveMath(root: ParentNode, warnings: string[]): void {
     }
   }
   if (unrendered > 0) {
-    warnings.push(`${unrendered} math element(s) had not rendered when the canvas was exported.`);
+    const recovered = sources.length > 0 || elements.some((el) => el.hasAttribute("data-tex"));
+    warnings.push(
+      `${unrendered} math element(s) had not rendered when the canvas was exported` +
+        (recovered ? "; their TeX source was exported instead." : "."),
+    );
   }
 }
 
@@ -144,7 +155,7 @@ async function resolveImages(root: ParentNode, opts: CleanOptions, warnings: str
 export async function cleanRendered(root: HTMLElement, opts: CleanOptions): Promise<string[]> {
   const warnings: string[] = [];
   removeDeadChrome(root, warnings);
-  resolveMath(root, warnings);
+  resolveMath(root, warnings, opts.mathSources ?? []);
   scrubLinks(root);
   await resolveImages(root, opts, warnings);
   stripEventHandlers(root);
