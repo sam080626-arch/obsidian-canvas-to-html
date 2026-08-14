@@ -1,0 +1,16 @@
+{
+  "nodes": [
+    { "id": "grp", "type": "group", "x": -60, "y": -80, "width": 700, "height": 400, "label": "Phase 1", "color": "5" },
+    { "id": "t1", "type": "text", "x": 0, "y": 0, "width": 220, "height": 120, "text": "# Kickoff\n\n- [ ] scope\n- [x] budget", "color": "4" },
+    { "id": "f1", "type": "file", "x": 400, "y": 0, "width": 240, "height": 160, "file": "Notes/Brief.md" },
+    { "id": "img", "type": "file", "x": 0, "y": 200, "width": 200, "height": 120, "file": "Assets/Chart.png" },
+    { "id": "pdf", "type": "file", "x": 400, "y": 200, "width": 200, "height": 120, "file": "Papers/Study.pdf" },
+    { "id": "url", "type": "link", "x": 700, "y": 0, "width": 240, "height": 120, "url": "https://obsidian.md/canvas" },
+    { "id": "gone", "type": "file", "x": 700, "y": 200, "width": 200, "height": 120, "file": "Nowhere/Lost.md" }
+  ],
+  "edges": [
+    { "id": "e1", "fromNode": "t1", "fromSide": "right", "toNode": "f1", "toSide": "left" },
+    { "id": "e2", "fromNode": "t1", "fromSide": "bottom", "toNode": "img", "toSide": "top", "color": "1" },
+    { "id": "e3", "fromNode": "f1", "fromSide": "right", "toNode": "url", "toSide": "left", "fromEnd": "arrow" }
+  ]
+}
