@@ -1,0 +1,9 @@
+{
+  "id": "canvas-to-html",
+  "name": "Canvas to HTML",
+  "version": "0.1.0",
+  "minAppVersion": "1.4.0",
+  "description": "Export a Canvas to a single self-contained HTML file you can share.",
+  "author": "朱劭恩",
+  "isDesktopOnly": false
+}
