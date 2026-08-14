@@ -1,47 +1,78 @@
 :root {
-  --cv-bg: #ffffff;
+  /* Values below mirror Obsidian 1.13.7's default theme so an export reads the
+     same as the canvas it came from: the base colour ramp, the type scale
+     (--h1-size etc.), --p-spacing, and the canvas node palette. */
+  --cv-bg: #f6f6f6;
   --cv-surface: #ffffff;
+  --cv-surface-alt: #fafafa;
   --cv-text: #222222;
-  --cv-muted: #6b6b6b;
-  --cv-border: #d4d4d4;
-  --cv-edge: #8a8a8a;
+  --cv-muted: #5c5c5c;
+  --cv-faint: #ababab;
+  --cv-border: #e4e4e4;
+  --cv-edge: #999999;
   --cv-grid: rgba(0, 0, 0, 0.06);
-  --cv-code-bg: #f4f4f4;
-  --cv-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
-  --cv-color-1: #e35555;
-  --cv-color-2: #e08c46;
-  --cv-color-3: #e0c341;
-  --cv-color-4: #59b359;
-  --cv-color-5: #4aa8c9;
-  --cv-color-6: #9a6bd6;
+  --cv-code-bg: #fafafa;
+  --cv-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+
+  --cv-red: 233, 49, 71;
+  --cv-orange: 236, 117, 0;
+  --cv-yellow: 224, 172, 0;
+  --cv-green: 8, 185, 78;
+  --cv-cyan: 0, 191, 188;
+  --cv-purple: 120, 82, 238;
+
+  --cv-color-1: rgb(var(--cv-red));
+  --cv-color-2: rgb(var(--cv-orange));
+  --cv-color-3: rgb(var(--cv-yellow));
+  --cv-color-4: rgb(var(--cv-green));
+  --cv-color-5: rgb(var(--cv-cyan));
+  --cv-color-6: rgb(var(--cv-purple));
+
+  --cv-font-size: 16px;
+  --cv-line-height: 1.5;
+  --cv-line-height-tight: 1.3;
+  --cv-p-spacing: 1rem;
+  --cv-heading-spacing: calc(var(--cv-p-spacing) * 2.5);
+  --cv-h1: 1.618em;
+  --cv-h2: 1.462em;
+  --cv-h3: 1.318em;
+  --cv-h4: 1.188em;
+  --cv-h5: 1.076em;
+  --cv-h6: 1em;
+  --cv-code-size: 0.875em;
+
   color-scheme: light;
 }
 
 @media (prefers-color-scheme: dark) {
   html:not([data-theme="light"]) {
-    --cv-bg: #1e1e1e;
-    --cv-surface: #262626;
-    --cv-text: #dcdcdc;
-    --cv-muted: #9a9a9a;
-    --cv-border: #3d3d3d;
-    --cv-edge: #7d7d7d;
+    --cv-bg: #282828;
+    --cv-surface: #1c1c1c;
+    --cv-surface-alt: #232323;
+    --cv-text: #dadada;
+    --cv-muted: #b3b3b3;
+    --cv-faint: #666666;
+    --cv-border: #333333;
+    --cv-edge: #707070;
     --cv-grid: rgba(255, 255, 255, 0.05);
-    --cv-code-bg: #2f2f2f;
-    --cv-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+    --cv-code-bg: #232323;
+    --cv-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
     color-scheme: dark;
   }
 }
 
 html[data-theme="dark"] {
-  --cv-bg: #1e1e1e;
-  --cv-surface: #262626;
-  --cv-text: #dcdcdc;
-  --cv-muted: #9a9a9a;
-  --cv-border: #3d3d3d;
-  --cv-edge: #7d7d7d;
+  --cv-bg: #282828;
+  --cv-surface: #1c1c1c;
+  --cv-surface-alt: #232323;
+  --cv-text: #dadada;
+  --cv-muted: #b3b3b3;
+  --cv-faint: #666666;
+  --cv-border: #333333;
+  --cv-edge: #707070;
   --cv-grid: rgba(255, 255, 255, 0.05);
-  --cv-code-bg: #2f2f2f;
-  --cv-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+  --cv-code-bg: #232323;
+  --cv-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
   color-scheme: dark;
 }
 
@@ -55,8 +86,8 @@ html, body {
   color: var(--cv-text);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
     "PingFang TC", "Noto Sans TC", sans-serif;
-  font-size: 16px;
-  line-height: 1.5;
+  font-size: var(--cv-font-size);
+  line-height: var(--cv-line-height);
 }
 
 #cv-viewport {
@@ -108,8 +139,12 @@ html, body {
   overflow: hidden;
 }
 
-.cv-card-body { padding: 10px 14px; height: 100%; overflow: hidden; }
+.cv-card-body { padding: 12px 16px; height: 100%; overflow: hidden; }
 .cv-scrollable > .cv-card-body { overflow-y: auto; overscroll-behavior: contain; }
+/* Bodies that supply their own padding (image, placeholder, link card) go
+   edge-to-edge. Markdown bodies never do — that is what made embedded notes
+   read as cramped. */
+.cv-flush > .cv-card-body { padding: 0; }
 
 .cv-card-group {
   background: color-mix(in srgb, var(--cv-node-color, var(--cv-border)) 12%, transparent);
@@ -125,12 +160,10 @@ html, body {
   left: 2px;
   font-size: 0.95em;
   font-weight: 600;
-  color: var(--cv-muted);
+  /* Obsidian: --canvas-card-label-color: var(--text-faint) */
+  color: var(--cv-faint);
   white-space: nowrap;
 }
-
-.cv-card-file > .cv-card-body,
-.cv-card-link > .cv-card-body { padding: 0; }
 
 .cv-image { display: block; width: 100%; height: 100%; object-fit: contain; }
 
@@ -170,59 +203,140 @@ html, body {
   font-size: 0.85em;
 }
 
-/* Rendered markdown */
+/* Rendered markdown — spacing and type scale follow Obsidian's defaults */
+.cv-card-body > :first-child { margin-top: 0; }
+.cv-card-body > :last-child { margin-bottom: 0; }
+
 .cv-card-body h1, .cv-card-body h2, .cv-card-body h3,
 .cv-card-body h4, .cv-card-body h5, .cv-card-body h6 {
-  margin: 0.4em 0 0.3em;
-  line-height: 1.25;
+  margin-top: var(--cv-heading-spacing);
+  margin-bottom: 0;
+  line-height: var(--cv-line-height-tight);
 }
-.cv-card-body h1 { font-size: 1.5em; }
-.cv-card-body h2 { font-size: 1.3em; }
-.cv-card-body h3 { font-size: 1.15em; }
-.cv-card-body p { margin: 0.4em 0; }
-.cv-card-body ul, .cv-card-body ol { margin: 0.4em 0; padding-left: 1.4em; }
-.cv-card-body li { margin: 0.15em 0; }
+.cv-card-body h1 { font-size: var(--cv-h1); font-weight: 700; }
+.cv-card-body h2 { font-size: var(--cv-h2); font-weight: 600; }
+.cv-card-body h3 { font-size: var(--cv-h3); font-weight: 600; }
+.cv-card-body h4 { font-size: var(--cv-h4); font-weight: 600; }
+.cv-card-body h5 { font-size: var(--cv-h5); font-weight: 600; }
+.cv-card-body h6 { font-size: var(--cv-h6); font-weight: 600; color: var(--cv-muted); }
+
+.cv-card-body p { margin: var(--cv-p-spacing) 0; }
+.cv-card-body ul, .cv-card-body ol { margin: var(--cv-p-spacing) 0; padding-left: 1.5em; }
+.cv-card-body li { margin: 0.1em 0; }
+.cv-card-body li > ul, .cv-card-body li > ol { margin: 0.1em 0; }
+
 .cv-card-body code {
   background: var(--cv-code-bg);
   border-radius: 4px;
-  padding: 0.1em 0.35em;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 0.88em;
+  padding: 0.1em 0.25em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--cv-code-size);
 }
 .cv-card-body pre {
   background: var(--cv-code-bg);
-  border-radius: 6px;
-  padding: 10px 12px;
+  border-radius: 4px;
+  padding: 12px;
+  margin: var(--cv-p-spacing) 0;
   overflow-x: auto;
+  font-size: var(--cv-code-size);
+  line-height: 1.45;
 }
-.cv-card-body pre code { background: none; padding: 0; }
+.cv-card-body pre code { background: none; padding: 0; font-size: 1em; }
+
+/* Prism tokens, so code keeps the colouring it has in Obsidian */
+.cv-card-body .token.comment, .cv-card-body .token.prolog,
+.cv-card-body .token.doctype, .cv-card-body .token.cdata { color: var(--cv-faint); font-style: italic; }
+.cv-card-body .token.punctuation { color: var(--cv-muted); }
+.cv-card-body .token.property, .cv-card-body .token.tag, .cv-card-body .token.constant,
+.cv-card-body .token.symbol, .cv-card-body .token.deleted { color: rgb(var(--cv-red)); }
+.cv-card-body .token.boolean, .cv-card-body .token.number { color: rgb(var(--cv-purple)); }
+.cv-card-body .token.selector, .cv-card-body .token.attr-name, .cv-card-body .token.string,
+.cv-card-body .token.char, .cv-card-body .token.builtin, .cv-card-body .token.inserted { color: rgb(var(--cv-green)); }
+.cv-card-body .token.operator, .cv-card-body .token.entity, .cv-card-body .token.url { color: rgb(var(--cv-cyan)); }
+.cv-card-body .token.atrule, .cv-card-body .token.attr-value,
+.cv-card-body .token.keyword { color: rgb(var(--cv-purple)); }
+.cv-card-body .token.function, .cv-card-body .token.class-name { color: rgb(var(--cv-orange)); }
+.cv-card-body .token.regex, .cv-card-body .token.important, .cv-card-body .token.variable { color: rgb(var(--cv-yellow)); }
+
 .cv-card-body blockquote {
-  margin: 0.5em 0;
-  padding-left: 0.9em;
-  border-left: 3px solid var(--cv-border);
+  margin: var(--cv-p-spacing) 0;
+  padding: 0 0 0 1em;
+  border-left: 2px solid var(--cv-border);
   color: var(--cv-muted);
 }
-.cv-card-body table { border-collapse: collapse; font-size: 0.92em; }
-.cv-card-body th, .cv-card-body td { border: 1px solid var(--cv-border); padding: 4px 8px; }
-.cv-card-body img { max-width: 100%; height: auto; }
-.cv-card-body hr { border: none; border-top: 1px solid var(--cv-border); margin: 0.8em 0; }
-.cv-card-body a { color: var(--cv-color-5); }
+
+.cv-card-body table {
+  border-collapse: collapse;
+  margin: var(--cv-p-spacing) 0;
+  font-size: 0.95em;
+  max-width: 100%;
+}
+.cv-card-body th, .cv-card-body td {
+  border: 1px solid var(--cv-border);
+  padding: 4px 8px;
+  text-align: left;
+}
+.cv-card-body th { font-weight: 600; background: var(--cv-surface-alt); }
+
+.cv-card-body img { max-width: 100%; height: auto; border-radius: 4px; }
+.cv-card-body hr { border: none; border-top: 1px solid var(--cv-border); margin: var(--cv-heading-spacing) 0; }
+.cv-card-body a { color: rgb(var(--cv-purple)); text-decoration: none; }
+.cv-card-body a:hover { text-decoration: underline; }
 .cv-card-body .cv-dead-link {
-  color: inherit;
-  text-decoration: underline dotted;
+  color: var(--cv-text);
+  text-decoration: underline dotted var(--cv-faint);
   cursor: help;
 }
-.cv-card-body .callout {
-  border: 1px solid var(--cv-border);
-  border-left-width: 4px;
-  border-radius: 6px;
-  padding: 8px 12px;
-  margin: 0.5em 0;
-  background: var(--cv-code-bg);
+.cv-card-body .cv-math-source {
+  color: var(--cv-muted);
+  font-style: italic;
 }
-.cv-card-body .callout-title { font-weight: 600; margin-bottom: 0.2em; }
-.cv-card-body .task-list-item { list-style: none; margin-left: -1.2em; }
-.cv-card-body input[type="checkbox"] { margin-right: 0.4em; }
+
+/* Callouts — Obsidian tints the box and title from the callout type */
+.cv-card-body .callout {
+  --cv-callout: var(--cv-cyan);
+  margin: var(--cv-p-spacing) 0;
+  padding: 12px 12px 12px 16px;
+  border-radius: 4px;
+  border-left: 3px solid rgb(var(--cv-callout));
+  background: rgba(var(--cv-callout), 0.1);
+  mix-blend-mode: normal;
+}
+.cv-card-body .callout[data-callout="abstract"], .cv-card-body .callout[data-callout="summary"],
+.cv-card-body .callout[data-callout="tip"], .cv-card-body .callout[data-callout="hint"] { --cv-callout: var(--cv-cyan); }
+.cv-card-body .callout[data-callout="todo"], .cv-card-body .callout[data-callout="info"] { --cv-callout: var(--cv-cyan); }
+.cv-card-body .callout[data-callout="success"], .cv-card-body .callout[data-callout="check"],
+.cv-card-body .callout[data-callout="done"] { --cv-callout: var(--cv-green); }
+.cv-card-body .callout[data-callout="question"], .cv-card-body .callout[data-callout="help"],
+.cv-card-body .callout[data-callout="warning"], .cv-card-body .callout[data-callout="caution"],
+.cv-card-body .callout[data-callout="attention"] { --cv-callout: var(--cv-orange); }
+.cv-card-body .callout[data-callout="failure"], .cv-card-body .callout[data-callout="fail"],
+.cv-card-body .callout[data-callout="missing"], .cv-card-body .callout[data-callout="danger"],
+.cv-card-body .callout[data-callout="error"], .cv-card-body .callout[data-callout="bug"] { --cv-callout: var(--cv-red); }
+.cv-card-body .callout[data-callout="example"] { --cv-callout: var(--cv-purple); }
+.cv-card-body .callout[data-callout="quote"], .cv-card-body .callout[data-callout="cite"] { --cv-callout: var(--cv-red); }
+
+.cv-card-body .callout-title {
+  display: flex;
+  gap: 6px;
+  font-weight: 600;
+  color: rgb(var(--cv-callout));
+  line-height: var(--cv-line-height-tight);
+}
+.cv-card-body .callout-content > :first-child { margin-top: 0.4em; }
+.cv-card-body .callout-content > :last-child { margin-bottom: 0; }
+
+/* Task lists */
+.cv-card-body ul.contains-task-list { padding-left: 1.6em; }
+.cv-card-body .task-list-item { list-style: none; position: relative; }
+.cv-card-body .task-list-item-checkbox {
+  position: absolute;
+  left: -1.4em;
+  top: 0.25em;
+  margin: 0;
+  accent-color: rgb(var(--cv-purple));
+}
+.cv-card-body .task-list-item.is-checked { color: var(--cv-muted); text-decoration: line-through; }
 
 #cv-controls {
   position: fixed;

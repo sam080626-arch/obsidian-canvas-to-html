@@ -122,6 +122,25 @@ describe("viewport measurement", () => {
   });
 });
 
+describe("card scroll", () => {
+  it("starts every card at the top, even if the browser restored an offset", () => {
+    handle.destroy();
+    const body = document.querySelector('[data-id="a"] .cv-card-body') as HTMLElement;
+    Object.defineProperty(body, "scrollHeight", { value: 500, configurable: true });
+    Object.defineProperty(body, "clientHeight", { value: 100, configurable: true });
+    let top = 278; // as if restored from bfcache
+    Object.defineProperty(body, "scrollTop", {
+      configurable: true,
+      get: () => top,
+      set: (v: number) => {
+        top = v;
+      },
+    });
+    handle = initViewer(document);
+    expect(body.scrollTop).toBe(0);
+  });
+});
+
 describe("wheel", () => {
   it("pans on a plain wheel and does not change scale", () => {
     const before = handle.getView();

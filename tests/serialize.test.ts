@@ -14,6 +14,7 @@ function input(overrides: Partial<SerializeInput> = {}): SerializeInput {
         colorVar: "var(--cv-color-4)",
         html: "<h1>Hi</h1>",
         scrollable: true,
+        flush: false,
       },
     ],
     edges: [
@@ -85,6 +86,12 @@ describe("buildHtml", () => {
       `<div class="cv-card cv-card-text cv-scrollable" data-id="a" style="left:0px;top:0px;width:200px;height:100px;--cv-node-color:var(--cv-color-4)">`,
     );
     expect(html).toContain("<h1>Hi</h1>");
+  });
+
+  it("adds cv-flush for a card whose body supplies its own padding", () => {
+    const nodes = input().nodes.map((n) => ({ ...n, flush: true }));
+    const html = buildHtml(input({ nodes }));
+    expect(html).toContain(`class="cv-card cv-card-text cv-scrollable cv-flush"`);
   });
 
   it("omits the scrollable class when a card fits", () => {

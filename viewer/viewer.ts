@@ -196,6 +196,12 @@ export function initViewer(root: Document): { getView: () => View; destroy: () =
     root.documentElement.setAttribute("data-theme", stored);
   }
 
+  // Browsers restore per-element scroll offsets on reload and bfcache restore, so
+  // a card can open part-way down its content. Every card starts at the top.
+  root.querySelectorAll(".cv-card-body").forEach((body) => {
+    (body as HTMLElement).scrollTop = 0;
+  });
+
   const controls = root.getElementById("cv-controls");
   viewport.addEventListener("wheel", onWheel as EventListener, { passive: false });
   viewport.addEventListener("pointerdown", onPointerDown as EventListener);

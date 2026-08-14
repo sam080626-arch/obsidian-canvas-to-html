@@ -139,6 +139,36 @@ describe("resolveScene", () => {
     });
   });
 
+  it("marks media bodies flush and markdown bodies padded", async () => {
+    const result = await resolveScene(
+      scene([
+        { id: "text", kind: "text", rect, text: "hi" },
+        { id: "note", kind: "file", rect, file: "Notes/Deep.md" },
+        { id: "image", kind: "file", rect, file: "Images/Shot.png" },
+        { id: "pdf", kind: "file", rect, file: "Papers/Long.pdf" },
+        { id: "link", kind: "link", rect, url: "https://example.com" },
+        { id: "group", kind: "group", rect },
+      ]),
+      deps(),
+    );
+    const flush = Object.fromEntries(result.nodes.map((n) => [n.id, n.flush]));
+    // Markdown must keep the card's own padding; media supplies its own.
+    expect(flush.text).toBe(false);
+    expect(flush.note).toBe(false);
+    expect(flush.image).toBe(true);
+    expect(flush.pdf).toBe(true);
+    expect(flush.link).toBe(true);
+    expect(flush.group).toBe(true);
+  });
+
+  it("marks a failed markdown render padded so the fallback stays readable", async () => {
+    const result = await resolveScene(
+      scene([{ id: "x", kind: "text", rect, text: "**oops**" }]),
+      deps({ renderer: { renderMarkdown: async () => { throw new Error("nope"); } } }),
+    );
+    expect(result.nodes[0].flush).toBe(false);
+  });
+
   it("keeps node order stable", async () => {
     const result = await resolveScene(
       scene([

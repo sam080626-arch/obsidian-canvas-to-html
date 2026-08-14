@@ -78,6 +78,26 @@ describe("exportCanvas", () => {
     expect(html).toContain("File not found");
   });
 
+  it("folds collected render warnings into the result and the file comment", async () => {
+    const collected: string[] = [];
+    const chatty: ResolveDeps = {
+      ...deps,
+      renderer: {
+        async renderMarkdown(md: string) {
+          collected.push("math did not render");
+          return `<p>${md}</p>`;
+        },
+      },
+    };
+    const { html, warnings } = await exportCanvas(canvasJson, "Plan", chatty, {
+      ...options,
+      collectedWarnings: collected,
+    });
+    // Both cards push the same warning; the reader should see it once.
+    expect(warnings).toEqual(["math did not render"]);
+    expect(html).toContain("math did not render");
+  });
+
   it("propagates a parse error", async () => {
     await expect(exportCanvas("{broken", "T", deps, options)).rejects.toThrow(
       /not valid JSON/,

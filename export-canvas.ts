@@ -10,6 +10,13 @@ export interface ExportOptions {
   css: string;
   js: string;
   defaultTheme: "system" | "light" | "dark";
+  /**
+   * A live array the renderer appends to while nodes are resolved. It is read
+   * after resolution and before serialization, so late warnings still reach the
+   * exported file. Duplicates are collapsed — one warning per distinct message,
+   * not per card.
+   */
+  collectedWarnings?: string[];
 }
 
 export interface ExportResult {
@@ -45,7 +52,8 @@ export async function exportCanvas(
   options: ExportOptions,
 ): Promise<ExportResult> {
   const scene = parseCanvas(json);
-  const { nodes, warnings } = await resolveScene(scene, deps);
+  const { nodes, warnings: resolveWarnings } = await resolveScene(scene, deps);
+  const warnings = [...resolveWarnings, ...new Set(options.collectedWarnings ?? [])];
   const byId = new Map(scene.nodes.map((n) => [n.id, n]));
   const edges = scene.edges
     .map((edge) => renderEdge(edge, byId))

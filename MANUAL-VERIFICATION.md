@@ -14,6 +14,21 @@ These checks need real Obsidian and a real browser.
 
 ## Rendering fidelity
 
+Formatting inside cards must match the canvas. The stylesheet mirrors Obsidian
+1.13.7's own values (`--h1-size: 1.618em`, `--p-spacing: 1rem`, the base colour
+ramp, and the red/orange/yellow/green/cyan/purple canvas palette), so differences
+here are bugs, not taste.
+
+- [ ] An embedded-note card has the same inner padding as a text card — neither is
+      flush against its border.
+- [ ] Heading sizes and paragraph spacing look the same as the note does in Obsidian.
+- [ ] No copy-code button, Mermaid "Allow" prompt, or empty icon box appears in any card.
+- [ ] Every card opens scrolled to the top of its content.
+- [ ] Code blocks keep their syntax colouring.
+- [ ] An image embedded *inside* a note (`![[Chart.png]]`) appears in the export.
+- [ ] Math renders; if it does not, the Notice reports it and the source is shown
+      rather than a blank gap.
+
 - [ ] Headings, lists, tables, blockquotes, and inline code match Obsidian closely.
 - [ ] Task checkboxes render checked/unchecked correctly.
 - [ ] Callouts keep their title and left border.

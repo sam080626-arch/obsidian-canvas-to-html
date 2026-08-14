@@ -77,29 +77,29 @@ async function resolveNode(
   };
 
   if (node.kind === "group") {
-    return { ...base, html: "", scrollable: false };
+    return { ...base, html: "", scrollable: false, flush: true };
   }
 
   if (node.kind === "link") {
     const url = node.url ?? "";
     if (!/^https?:\/\//i.test(url)) {
       warnings.push(`Unsupported URL on node ${node.id}: ${url}`);
-      return { ...base, html: placeholder("🔗", "Unsupported link"), scrollable: false };
+      return { ...base, html: placeholder("🔗", "Unsupported link"), scrollable: false, flush: true };
     }
     const html =
       `<a class="cv-link-card" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">` +
       `<div class="cv-link-host">${escapeHtml(hostnameOf(url))}</div>` +
       `<div class="cv-link-url">${escapeHtml(url)}</div></a>`;
-    return { ...base, html, scrollable: false };
+    return { ...base, html, scrollable: false, flush: true };
   }
 
   if (node.kind === "text") {
     const text = node.text ?? "";
     try {
-      return { ...base, html: await deps.renderer.renderMarkdown(text, ""), scrollable: true };
+      return { ...base, html: await deps.renderer.renderMarkdown(text, ""), scrollable: true, flush: false };
     } catch (error) {
       warnings.push(`Could not render node ${node.id}: ${(error as Error).message}`);
-      return { ...base, html: sourceFallback(text), scrollable: true };
+      return { ...base, html: sourceFallback(text), scrollable: true, flush: false };
     }
   }
 
@@ -108,7 +108,7 @@ async function resolveNode(
   const file = deps.vault.getFile(path);
   if (!file) {
     warnings.push(`File not found: ${path}`);
-    return { ...base, html: placeholder("⚠", "File not found", path), scrollable: false };
+    return { ...base, html: placeholder("⚠", "File not found", path), scrollable: false, flush: true };
   }
 
   const ext = file.extension.toLowerCase();
@@ -116,10 +116,10 @@ async function resolveNode(
   if (ext === "md") {
     try {
       const source = await deps.vault.readText(file.path);
-      return { ...base, html: await deps.renderer.renderMarkdown(source, file.path), scrollable: true };
+      return { ...base, html: await deps.renderer.renderMarkdown(source, file.path), scrollable: true, flush: false };
     } catch (error) {
       warnings.push(`Could not render ${path}: ${(error as Error).message}`);
-      return { ...base, html: placeholder("⚠", "Could not render note", path), scrollable: false };
+      return { ...base, html: placeholder("⚠", "Could not render note", path), scrollable: false, flush: true };
     }
   }
 
@@ -131,13 +131,13 @@ async function resolveNode(
         return deps.images.toInlineImage(bytes, mime, deps.maxImageDimension);
       });
       const html = `<img class="cv-image" src="${escapeHtml(uri)}" alt="${escapeHtml(basename(path))}" />`;
-      return { ...base, html, scrollable: false };
+      return { ...base, html, scrollable: false, flush: true };
     } catch (error) {
       warnings.push(`Could not inline image ${path}: ${(error as Error).message}`);
-      return { ...base, html: placeholder("🖼", "Image unavailable", basename(path)), scrollable: false };
+      return { ...base, html: placeholder("🖼", "Image unavailable", basename(path)), scrollable: false, flush: true };
     }
   }
 
   const icon = ext === "pdf" ? "📄" : "📎";
-  return { ...base, html: placeholder(icon, basename(path), ext.toUpperCase()), scrollable: false };
+  return { ...base, html: placeholder(icon, basename(path), ext.toUpperCase()), scrollable: false, flush: true };
 }

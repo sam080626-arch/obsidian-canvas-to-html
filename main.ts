@@ -1,12 +1,13 @@
 import { Component, Menu, Notice, Plugin, TFile, normalizePath } from "obsidian";
 import { CanvasParseError } from "./canvas-model";
-import { fitWithin, pickEncoding, toDataUri } from "./assets";
+import { AssetCache, fitWithin, mimeForExtension, pickEncoding, toDataUri } from "./assets";
 import { exportCanvas } from "./export-canvas";
 import { createObsidianRenderer } from "./render-markdown";
 import { DEFAULT_SETTINGS } from "./settings";
 import type { CanvasToHtmlSettings } from "./settings";
 import { CanvasToHtmlSettingTab } from "./settings-tab";
 import type { ImageProcessor, VaultLike } from "./resolve";
+import type { EmbedResolver } from "./render-markdown";
 
 declare const __VIEWER_JS__: string;
 declare const __VIEWER_CSS__: string;
@@ -99,24 +100,63 @@ export default class CanvasToHtmlPlugin extends Plugin {
     };
   }
 
+  /**
+   * Resolves an embedded image's link text against the vault and inlines it, so
+   * images inside embedded notes survive the export instead of being dropped.
+   */
+  private buildEmbedResolver(sourceFile: TFile, images: ImageProcessor, cache: AssetCache): EmbedResolver {
+    const app = this.app;
+    const maxDim = this.settings.maxImageDimension;
+    return {
+      resolveEmbed: async (linktext: string, sourcePath: string): Promise<string | null> => {
+        const target = app.metadataCache.getFirstLinkpathDest(
+          linktext.split("#")[0],
+          sourcePath || sourceFile.path,
+        );
+        if (!target) return null;
+        const mime = mimeForExtension(target.extension);
+        if (!mime) return null;
+        try {
+          return await cache.get(target.path, async () => {
+            const bytes = await app.vault.readBinary(target);
+            return images.toInlineImage(bytes, mime, maxDim);
+          });
+        } catch {
+          return null;
+        }
+      },
+    };
+  }
+
   private async exportFile(file: TFile): Promise<void> {
     const component = new Component();
     component.load();
     try {
       const json = await this.app.vault.read(file);
+      const images = this.buildImageProcessor();
+      const assetCache = new AssetCache();
+      // Warnings raised while rendering markdown are collected here and merged
+      // with the ones exportCanvas returns.
+      const renderWarnings: string[] = [];
       const { html, warnings } = await exportCanvas(
         json,
         file.basename,
         {
           vault: this.buildVaultAdapter(),
-          renderer: createObsidianRenderer(this.app, component),
-          images: this.buildImageProcessor(),
+          renderer: createObsidianRenderer(
+            this.app,
+            component,
+            this.buildEmbedResolver(file, images, assetCache),
+            renderWarnings,
+          ),
+          images,
           maxImageDimension: this.settings.maxImageDimension,
         },
         {
           css: __VIEWER_CSS__,
           js: __VIEWER_JS__,
           defaultTheme: this.settings.defaultTheme,
+          collectedWarnings: renderWarnings,
         },
       );
 

@@ -7,6 +7,8 @@ export interface RenderedNode {
   colorVar: string | null;
   html: string;
   scrollable: boolean;
+  /** The body supplies its own padding (image, placeholder, link card). */
+  flush: boolean;
   label?: string;
 }
 
@@ -54,6 +56,7 @@ function jsonScriptSafe(value: unknown): string {
 function nodeHtml(node: RenderedNode): string {
   const classes = ["cv-card", `cv-card-${node.kind}`];
   if (node.scrollable) classes.push("cv-scrollable");
+  if (node.flush) classes.push("cv-flush");
   const style =
     `left:${node.rect.x}px;top:${node.rect.y}px;` +
     `width:${node.rect.width}px;height:${node.rect.height}px` +
