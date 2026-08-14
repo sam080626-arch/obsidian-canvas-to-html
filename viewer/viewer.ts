@@ -42,10 +42,26 @@ export function initViewer(root: Document): { getView: () => View; destroy: () =
   const world = root.getElementById("cv-world") as HTMLElement;
   const win = root.defaultView as Window;
 
-  let view: View = fit(meta.bounds, win.innerWidth, win.innerHeight);
   let dragging = false;
   let lastX = 0;
   let lastY = 0;
+  // While false, a resize refits. The reader's own zoom/pan wins over that.
+  let userAdjusted = false;
+
+  /**
+   * The viewport's laid-out box, falling back to the window. Reading the element
+   * matters because the window can still report 0 when the document is laid out
+   * after load (background tab, restored session), and fitting against 0 would
+   * collapse the canvas to the minimum scale.
+   */
+  function viewportSize(): { w: number; h: number } {
+    return {
+      w: viewport.clientWidth || win.innerWidth || 0,
+      h: viewport.clientHeight || win.innerHeight || 0,
+    };
+  }
+
+  let view: View = fit(meta.bounds, viewportSize().w, viewportSize().h);
 
   function apply(): void {
     world.style.transform = toCss(view);
@@ -60,18 +76,27 @@ export function initViewer(root: Document): { getView: () => View; destroy: () =
     }
   }
 
+  /** A view the reader chose; resizing must not throw it away. */
+  function setUserView(next: View, animate = false): void {
+    userAdjusted = true;
+    setView(next, animate);
+  }
+
   function doFit(animate = false): void {
-    setView(fit(meta.bounds, win.innerWidth, win.innerHeight), animate);
+    const { w, h } = viewportSize();
+    userAdjusted = false;
+    setView(fit(meta.bounds, w, h), animate);
   }
 
   function zoomCentre(factor: number): void {
-    setView(zoomAt(view, win.innerWidth / 2, win.innerHeight / 2, factor));
+    const { w, h } = viewportSize();
+    setUserView(zoomAt(view, w / 2, h / 2, factor));
   }
 
   function onWheel(event: WheelEvent): void {
     event.preventDefault();
     if (event.ctrlKey || event.metaKey) {
-      setView(zoomAt(view, event.clientX, event.clientY, Math.exp(-event.deltaY * WHEEL_ZOOM_RATE)));
+      setUserView(zoomAt(view, event.clientX, event.clientY, Math.exp(-event.deltaY * WHEEL_ZOOM_RATE)));
       return;
     }
     const scrollable = scrollableAncestor(event.target, event.deltaY);
@@ -79,7 +104,7 @@ export function initViewer(root: Document): { getView: () => View; destroy: () =
       scrollable.scrollTop += event.deltaY;
       return;
     }
-    setView(panBy(view, -event.deltaX, -event.deltaY));
+    setUserView(panBy(view, -event.deltaX, -event.deltaY));
   }
 
   function onPointerDown(event: PointerEvent): void {
@@ -93,7 +118,7 @@ export function initViewer(root: Document): { getView: () => View; destroy: () =
 
   function onPointerMove(event: PointerEvent): void {
     if (!dragging) return;
-    setView(panBy(view, event.clientX - lastX, event.clientY - lastY));
+    setUserView(panBy(view, event.clientX - lastX, event.clientY - lastY));
     lastX = event.clientX;
     lastY = event.clientY;
   }
@@ -148,11 +173,16 @@ export function initViewer(root: Document): { getView: () => View; destroy: () =
     const from = meta.nodes[group.getAttribute("data-from") ?? ""];
     const to = meta.nodes[group.getAttribute("data-to") ?? ""];
     if (!from || !to) return;
-    setView(frame([from, to], win.innerWidth, win.innerHeight), true);
+    const { w, h } = viewportSize();
+    setUserView(frame([from, to], w, h), true);
   }
 
   function onResize(): void {
-    apply();
+    if (userAdjusted) {
+      apply();
+      return;
+    }
+    doFit();
   }
 
   const stored = (() => {

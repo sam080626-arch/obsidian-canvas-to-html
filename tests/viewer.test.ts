@@ -70,6 +70,58 @@ describe("initial view", () => {
   });
 });
 
+describe("viewport measurement", () => {
+  function stubBox(el: HTMLElement, width: number, height: number): void {
+    Object.defineProperty(el, "clientWidth", { value: width, configurable: true });
+    Object.defineProperty(el, "clientHeight", { value: height, configurable: true });
+  }
+
+  it("prefers the viewport element's own box over the window", () => {
+    handle.destroy();
+    stubBox(document.getElementById("cv-viewport") as HTMLElement, 800, 600);
+    handle = initViewer(document);
+    // (600 - 80) / 500 = 1.04 is the binding dimension
+    expect(handle.getView().k).toBeCloseTo(1.04, 5);
+  });
+
+  it("refits once the viewport gains a size, when it measured zero at load", () => {
+    handle.destroy();
+    Object.defineProperty(window, "innerWidth", { value: 0, configurable: true });
+    Object.defineProperty(window, "innerHeight", { value: 0, configurable: true });
+    handle = initViewer(document);
+    expect(handle.getView().k).toBe(0.05); // degenerate, clamped
+
+    Object.defineProperty(window, "innerWidth", { value: 1000, configurable: true });
+    Object.defineProperty(window, "innerHeight", { value: 1000, configurable: true });
+    window.dispatchEvent(new Event("resize"));
+    expect(handle.getView().k).toBeCloseTo(1.84, 5);
+  });
+
+  it("stops refitting on resize once the reader has zoomed", () => {
+    wheel({ deltaY: -100, ctrlKey: true, clientX: 500, clientY: 500 });
+    const zoomed = handle.getView();
+    window.dispatchEvent(new Event("resize"));
+    expect(handle.getView()).toEqual(zoomed);
+  });
+
+  it("stops refitting on resize once the reader has panned", () => {
+    wheel({ deltaX: 40, deltaY: 0, clientX: 500, clientY: 500 });
+    const panned = handle.getView();
+    window.dispatchEvent(new Event("resize"));
+    expect(handle.getView()).toEqual(panned);
+  });
+
+  it("still refits on resize after the reader presses the fit control", () => {
+    wheel({ deltaY: -100, ctrlKey: true, clientX: 500, clientY: 500 });
+    (document.querySelector('[data-action="fit"]') as HTMLElement).click();
+    Object.defineProperty(window, "innerWidth", { value: 2000, configurable: true });
+    window.dispatchEvent(new Event("resize"));
+    // 500-wide bounds in a 2000x1000 viewport → height binds: 920/500 = 1.84
+    expect(handle.getView().k).toBeCloseTo(1.84, 5);
+    expect(handle.getView().x).toBeCloseTo(1000 - 250 * 1.84, 5);
+  });
+});
+
 describe("wheel", () => {
   it("pans on a plain wheel and does not change scale", () => {
     const before = handle.getView();

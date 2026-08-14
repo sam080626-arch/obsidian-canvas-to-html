@@ -29,6 +29,10 @@ These checks need real Obsidian and a real browser.
 ## Viewer behavior
 
 - [ ] Opens fitted to the whole canvas.
+- [ ] Opening the file into a background tab, then switching to it, still shows a fitted canvas
+      (the viewport measures 0 until it is laid out; the viewer must refit rather than
+      collapse to minimum zoom).
+- [ ] Resizing the window refits — but stops refitting once you have zoomed or panned.
 - [ ] Two-finger scroll pans; ctrl/⌘+wheel zooms at the pointer.
 - [ ] Trackpad pinch zooms (macOS Safari, Chrome, Firefox).
 - [ ] Dragging empty space pans; dragging inside a card does not.
