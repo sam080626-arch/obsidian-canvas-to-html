@@ -13,12 +13,12 @@
   "author": "朱劭恩",
   "license": "MIT",
   "devDependencies": {
-    "@types/node": "^20.11.0",
-    "esbuild": "^0.20.0",
-    "jsdom": "^24.0.0",
+    "@types/node": "^26.2.0",
+    "esbuild": "^0.28.2",
+    "jsdom": "^30.0.1",
     "obsidian": "latest",
-    "typescript": "^5.4.0",
-    "vitest": "^1.4.0"
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.10"
   },
   "keywords": [
     "obsidian",
