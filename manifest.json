@@ -5,5 +5,6 @@
   "minAppVersion": "1.4.0",
   "description": "Export a Canvas to a single self-contained HTML file you can share.",
   "author": "朱劭恩",
-  "isDesktopOnly": false
+  "isDesktopOnly": false,
+  "authorUrl": "https://github.com/YOUR_GH_USERNAME"
 }

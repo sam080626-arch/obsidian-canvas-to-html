@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Test and build (Node ${{ matrix.node }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ["20", "22"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      - name: Typecheck and build
+        run: npm run build
+
+      - name: Check the built plugin is self-contained
+        run: |
+          test -f main.js || { echo "main.js was not produced"; exit 1; }
+          # The viewer runtime and stylesheet must be inlined into the bundle.
+          grep -q "cv-viewport" main.js || { echo "viewer CSS missing from bundle"; exit 1; }
+          grep -q "cv-meta" main.js || { echo "viewer JS missing from bundle"; exit 1; }
+          echo "main.js: $(wc -c < main.js) bytes"

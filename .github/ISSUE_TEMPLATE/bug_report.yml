@@ -1,0 +1,64 @@
+name: Bug report
+description: Something in the plugin or an exported file behaves incorrectly
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. The most useful thing you can attach is the
+        exported `.html` file (or the part of it that is wrong) plus the
+        `.canvas` it came from.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you expect, and what did you get instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Create a canvas with ...
+        2. Run "Export canvas to HTML"
+        3. Open the file in ...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: where
+    attributes:
+      label: Where does it go wrong?
+      options:
+        - Exporting in Obsidian (command fails, Notice reports an error)
+        - The exported file's content (something missing or wrong)
+        - The exported file's appearance (formatting differs from the canvas)
+        - The exported file's behaviour (zoom, pan, scrolling, theme)
+    validations:
+      required: true
+
+  - type: textarea
+    id: console
+    attributes:
+      label: Console output
+      description: >
+        Open the developer console in Obsidian (Ctrl/Cmd+Shift+I) and paste any
+        `[canvas-to-html]` warnings or errors.
+      render: text
+
+  - type: input
+    id: versions
+    attributes:
+      label: Versions
+      placeholder: "Plugin 0.1.0, Obsidian 1.13.7, macOS 15"
+    validations:
+      required: true
+
+  - type: input
+    id: browser
+    attributes:
+      label: Browser used to open the export
+      placeholder: "Safari 18 / Chrome 130 / Firefox 132"
