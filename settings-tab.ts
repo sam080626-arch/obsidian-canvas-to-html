@@ -38,7 +38,7 @@ export class CanvasToHtmlSettingTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
-      .setName("Size warning threshold (MB)")
+      .setName("Size warning threshold in megabytes")
       .setDesc("Ask for confirmation before writing a file larger than this.")
       .addText((text) =>
         text.setValue(String(this.plugin.settings.sizeWarnThresholdMB)).onChange(async (value) => {

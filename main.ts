@@ -1,5 +1,6 @@
 import { Component, Menu, Notice, Plugin, TFile, normalizePath } from "obsidian";
 import { CanvasParseError } from "./canvas-model";
+import { confirmAction } from "./confirm-modal";
 import { AssetCache, fitWithin, mimeForExtension, pickEncoding, toDataUri } from "./assets";
 import { exportCanvas } from "./export-canvas";
 import { createObsidianRenderer } from "./render-markdown";
@@ -20,8 +21,8 @@ export default class CanvasToHtmlPlugin extends Plugin {
     this.addSettingTab(new CanvasToHtmlSettingTab(this.app, this));
 
     this.addCommand({
-      id: "export-canvas-to-html",
-      name: "Export canvas to HTML",
+      id: "export-active-canvas",
+      name: "Export the active canvas",
       checkCallback: (checking: boolean) => {
         const file = this.app.workspace.getActiveFile();
         if (!file || file.extension !== "canvas") return false;
@@ -44,7 +45,8 @@ export default class CanvasToHtmlPlugin extends Plugin {
   }
 
   async loadSettings(): Promise<void> {
-    this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+    const saved = (await this.loadData()) as Partial<CanvasToHtmlSettings> | null;
+    this.settings = { ...DEFAULT_SETTINGS, ...(saved ?? {}) };
   }
 
   async saveSettings(): Promise<void> {
@@ -85,7 +87,7 @@ export default class CanvasToHtmlPlugin extends Plugin {
           bitmap.close();
           return toDataUri(bytes, mime);
         }
-        const canvas = document.createElement("canvas");
+        const canvas = createEl("canvas");
         canvas.width = target.width;
         canvas.height = target.height;
         const ctx = canvas.getContext("2d");
@@ -164,10 +166,13 @@ export default class CanvasToHtmlPlugin extends Plugin {
 
       const sizeMB = new Blob([html]).size / (1024 * 1024);
       if (sizeMB > this.settings.sizeWarnThresholdMB) {
-        const proceed = window.confirm(
-          `This export is ${sizeMB.toFixed(1)} MB, over the ${this.settings.sizeWarnThresholdMB} MB ` +
-            `threshold. Write it anyway?`,
-        );
+        const proceed = await confirmAction(this.app, {
+          title: "Large export",
+          body:
+            `This export is ${sizeMB.toFixed(1)} MB, over the ` +
+            `${this.settings.sizeWarnThresholdMB} MB threshold set in settings.`,
+          confirmText: "Export anyway",
+        });
         if (!proceed) {
           new Notice("Export cancelled.");
           return;

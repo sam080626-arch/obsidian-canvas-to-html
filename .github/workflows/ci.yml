@@ -28,6 +28,9 @@ jobs:
       - name: Run tests
         run: npm test
 
+      - name: Lint (the same rules Obsidian's plugin validator applies)
+        run: npm run lint
+
       - name: Typecheck and build
         run: npm run build
 

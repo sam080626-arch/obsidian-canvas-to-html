@@ -101,7 +101,7 @@ export function reattachRenderedMath(source: ParentNode, target: ParentNode): nu
 
     for (const child of Array.from(rendered.children)) {
       if (!isAllowedMathElement(child)) continue;
-      const clone = placeholder.ownerDocument.importNode(child, true) as Element;
+      const clone = placeholder.ownerDocument.importNode(child, true);
       scrubMathSubtree(clone);
       placeholder.appendChild(clone);
     }
@@ -162,10 +162,12 @@ function resolveMath(root: ParentNode, warnings: string[], sources: string[]): v
     unrendered += 1;
     const tex = el.getAttribute("data-tex") ?? el.getAttribute("data-expr") ?? sources[i];
     if (tex) {
-      const code = el.ownerDocument.createElement("code");
-      code.className = "cv-math-source";
-      code.textContent = tex;
-      el.replaceWith(code);
+      // Reuse the placeholder rather than building a new node: it is already in
+      // the right position, and this module must stay usable outside Obsidian.
+      el.removeAttribute("data-tex");
+      el.removeAttribute("data-expr");
+      el.className = "cv-math-source";
+      el.textContent = tex;
     } else {
       el.remove();
     }
@@ -206,11 +208,12 @@ async function resolveImages(root: ParentNode, opts: CleanOptions, warnings: str
     const linktext = embed.getAttribute("src") ?? "";
     const img = embed.querySelector("img");
     const uri = linktext ? await opts.resolveEmbed(linktext) : null;
-    if (uri) {
-      const target = img ?? embed.ownerDocument.createElement("img");
-      target.setAttribute("src", uri);
-      if (!target.getAttribute("alt")) target.setAttribute("alt", embed.getAttribute("alt") ?? linktext);
-      if (!img) embed.appendChild(target);
+    // An embed that Obsidian never populated has no <img> to point at. Rendering
+    // waits for embeds to settle before this runs, so reaching here means the
+    // embed genuinely failed; inventing an element would hide that.
+    if (uri && img) {
+      img.setAttribute("src", uri);
+      if (!img.getAttribute("alt")) img.setAttribute("alt", embed.getAttribute("alt") ?? linktext);
       continue;
     }
     warnings.push(`Could not inline embedded image: ${linktext || "(unknown)"}`);

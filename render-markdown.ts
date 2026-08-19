@@ -70,9 +70,7 @@ export function createObsidianRenderer(
 
       // The host must be in the document: Obsidian skips async sub-rendering for
       // detached nodes. It is kept invisible and removed in the finally block.
-      const host = document.createElement("div");
-      host.addClass("markdown-rendered");
-      host.style.cssText = "position:absolute;left:-9999px;top:0;width:700px;visibility:hidden";
+      const host = createDiv({ cls: ["markdown-rendered", "canvas-to-html-render-host"] });
       document.body.appendChild(host);
       try {
         await MarkdownRenderer.render(app, markdown, host, sourcePath, component);
@@ -89,7 +87,7 @@ export function createObsidianRenderer(
         if (mathCss && !collect.css.includes(mathCss)) collect.css.push(mathCss);
 
         const safe = sanitizeHTMLToDom(host.innerHTML);
-        const wrapper = document.createElement("div");
+        const wrapper = createDiv();
         wrapper.appendChild(safe);
 
         // Obsidian's sanitizer drops MathJax's custom elements, so rendered math

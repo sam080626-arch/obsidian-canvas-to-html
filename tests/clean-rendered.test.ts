@@ -273,3 +273,14 @@ describe("reattachRenderedMath", () => {
     expect(dst.querySelector("iframe")).toBeNull();
   });
 });
+
+describe("cleanRendered — image embeds Obsidian never populated", () => {
+  it("warns instead of inventing an <img> when the embed is empty", async () => {
+    const el = host('<span class="internal-embed image-embed" src="Chart.png"></span>');
+    const warnings = await cleanRendered(el, {
+      resolveEmbed: async () => "data:image/png;base64,AAA",
+    });
+    expect(el.querySelector("img")).toBeNull();
+    expect(warnings.join()).toContain("Chart.png");
+  });
+});

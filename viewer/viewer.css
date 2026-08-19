@@ -199,7 +199,7 @@ html, body {
   margin: 0;
   white-space: pre-wrap;
   word-break: break-word;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 0.85em;
 }
 
@@ -229,7 +229,7 @@ html, body {
   background: var(--cv-code-bg);
   border-radius: 4px;
   padding: 0.1em 0.25em;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: SFMono-Regular, Menlo, Consolas, monospace;
   font-size: var(--cv-code-size);
 }
 .cv-card-body pre {
@@ -284,19 +284,26 @@ html, body {
 .cv-card-body a:hover { text-decoration: underline; }
 .cv-card-body .cv-dead-link {
   color: var(--cv-text);
-  text-decoration: underline dotted var(--cv-faint);
+  text-decoration-line: underline;
+  text-decoration-style: dotted;
+  text-decoration-color: var(--cv-faint);
   cursor: help;
 }
 /* MathJax's own web fonts are stripped to keep the file self-contained, so its
    output falls back to whatever maths font the reader has. */
-.cv-card-body mjx-container {
+.cv-card-body .MathJax {
   font-family: "Latin Modern Math", "STIX Two Math", "XITS Math", "Cambria Math",
     "Times New Roman", serif;
 }
-.cv-card-body mjx-container[display="true"] { display: block; margin: var(--cv-p-spacing) 0; overflow-x: auto; }
+.cv-card-body .MathJax[display="true"] { display: block; margin: var(--cv-p-spacing) 0; overflow-x: auto; }
 
 .cv-card-body .cv-math-source {
+  padding: 0.1em 0.25em;
+  border-radius: 4px;
+  background: var(--cv-code-bg);
   color: var(--cv-muted);
+  font-family: SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--cv-code-size);
   font-style: italic;
 }
 

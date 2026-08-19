@@ -1,7 +1,7 @@
 # Canvas to HTML
 
-[![CI](https://github.com/YOUR_GH_USERNAME/obsidian-canvas-to-html/actions/workflows/ci.yml/badge.svg)](https://github.com/YOUR_GH_USERNAME/obsidian-canvas-to-html/actions/workflows/ci.yml)
-[![Release](https://img.shields.io/github/v/release/YOUR_GH_USERNAME/obsidian-canvas-to-html?sort=semver)](https://github.com/YOUR_GH_USERNAME/obsidian-canvas-to-html/releases)
+[![CI](https://github.com/sam080626-arch/obsidian-canvas-to-html/actions/workflows/ci.yml/badge.svg)](https://github.com/sam080626-arch/obsidian-canvas-to-html/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/sam080626-arch/obsidian-canvas-to-html?sort=semver)](https://github.com/sam080626-arch/obsidian-canvas-to-html/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 Export an Obsidian Canvas to **one self-contained HTML file** you can email, drop
@@ -20,8 +20,8 @@ the file is opened.
 
 ### From a release
 
-1. Download `main.js` and `manifest.json` from the [latest release](https://github.com/YOUR_GH_USERNAME/obsidian-canvas-to-html/releases/latest).
-2. Put both in `<your vault>/.obsidian/plugins/canvas-to-html/`.
+1. Download `main.js`, `manifest.json`, and `styles.css` from the [latest release](https://github.com/sam080626-arch/obsidian-canvas-to-html/releases/latest).
+2. Put all three in `<your vault>/.obsidian/plugins/canvas-to-html/`.
 3. Reload Obsidian, then enable **Canvas to HTML** in Settings → Community plugins.
 
 > If your vault syncs through iCloud, copy the files in. Do not symlink them —
@@ -29,7 +29,7 @@ the file is opened.
 
 ### With BRAT
 
-Add `YOUR_GH_USERNAME/obsidian-canvas-to-html` as a beta plugin in
+Add `sam080626-arch/obsidian-canvas-to-html` as a beta plugin in
 [BRAT](https://github.com/TfTHacker/obsidian42-brat).
 
 ## Usage
@@ -100,7 +100,8 @@ export reads like the canvas it came from.
 npm install
 npm run dev     # watch build
 npm test        # vitest
-npm run build   # typecheck + production bundle
+npm run lint    # the same rules Obsidian's plugin validator applies
+npm run build   # lint + typecheck + production bundle
 ```
 
 Two bundles are produced: the plugin (`main.js`) and the viewer runtime, which is

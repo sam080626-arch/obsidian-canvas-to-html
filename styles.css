@@ -1,0 +1,17 @@
+/*
+ * Styles for the plugin itself, loaded by Obsidian.
+ *
+ * The exported file's stylesheet is a separate thing entirely: it lives in
+ * viewer/viewer.css and is inlined into each export, never loaded by Obsidian.
+ *
+ * Markdown has to be rendered through a container that is attached to the
+ * document — Obsidian skips async sub-rendering (math, image embeds) for
+ * detached nodes — but that container must not be visible to the user.
+ */
+.canvas-to-html-render-host {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  width: 700px;
+  visibility: hidden;
+}

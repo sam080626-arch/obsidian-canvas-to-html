@@ -3,7 +3,7 @@
 ## Reporting a vulnerability
 
 Please report privately through
-[GitHub's private vulnerability reporting](https://github.com/YOUR_GH_USERNAME/obsidian-canvas-to-html/security/advisories/new)
+[GitHub's private vulnerability reporting](https://github.com/sam080626-arch/obsidian-canvas-to-html/security/advisories/new)
 rather than opening a public issue.
 
 ## Threat model

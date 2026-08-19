@@ -35,5 +35,5 @@ First working version.
 - Settings for output folder, maximum image dimension, re-encode quality, size
   warning threshold, default theme, and opening the file after export.
 
-[Unreleased]: https://github.com/YOUR_GH_USERNAME/obsidian-canvas-to-html/compare/0.1.0...HEAD
-[0.1.0]: https://github.com/YOUR_GH_USERNAME/obsidian-canvas-to-html/releases/tag/0.1.0
+[Unreleased]: https://github.com/sam080626-arch/obsidian-canvas-to-html/compare/0.1.0...HEAD
+[0.1.0]: https://github.com/sam080626-arch/obsidian-canvas-to-html/releases/tag/0.1.0

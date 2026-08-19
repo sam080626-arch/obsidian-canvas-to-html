@@ -11,8 +11,8 @@ npm test
 npm run build
 ```
 
-Node 20 or newer. To try changes in Obsidian, build and copy `main.js` and
-`manifest.json` into `<vault>/.obsidian/plugins/canvas-to-html/`, then use
+Node 20 or newer. To try changes in Obsidian, build and copy `main.js`,
+`manifest.json`, and `styles.css` into `<vault>/.obsidian/plugins/canvas-to-html/`, then use
 **Reload app without saving**. A scratch vault is strongly preferred over a real
 one. Do not symlink into an iCloud-synced vault — iCloud does not sync symlinks
 reliably.
@@ -28,6 +28,17 @@ reliably.
    stripped. The one deliberate exception is MathJax's output, which is carried
    across sanitization under its own strict allowlist in `clean-rendered.ts`. If
    you touch that allowlist, add tests for what it must keep out.
+
+## Linting
+
+`npm run lint` runs the same rules Obsidian's community-plugin validator applies,
+so its findings can be reproduced before submitting. It is part of `npm run build`
+and of CI. Disabling an `obsidianmd/*` rule inline is itself an error under that
+config — fix the code instead.
+
+There are two stylesheets, and they are not interchangeable. `styles.css` is the
+plugin's own, loaded by Obsidian. `viewer/viewer.css` is inlined into every export
+and only ever runs in a browser.
 
 ## Structure
 

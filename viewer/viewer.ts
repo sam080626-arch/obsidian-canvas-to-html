@@ -26,7 +26,7 @@ function scrollableAncestor(target: EventTarget | null, deltaY: number): HTMLEle
   const start = target as HTMLElement | null;
   const card = start?.closest?.(".cv-scrollable");
   if (!card) return null;
-  const body = card.querySelector(".cv-card-body") as HTMLElement | null;
+  const body = card.querySelector<HTMLElement>(".cv-card-body");
   if (!body) return null;
   const max = body.scrollHeight - body.clientHeight;
   if (max <= 0) return null;
@@ -37,7 +37,7 @@ function scrollableAncestor(target: EventTarget | null, deltaY: number): HTMLEle
 
 export function initViewer(root: Document): { getView: () => View; destroy: () => void } {
   const metaEl = root.getElementById("cv-meta");
-  const meta: Meta = JSON.parse(metaEl?.textContent ?? "{}");
+  const meta = JSON.parse(metaEl?.textContent ?? "{}") as Meta;
   const viewport = root.getElementById("cv-viewport") as HTMLElement;
   const world = root.getElementById("cv-world") as HTMLElement;
   const win = root.defaultView as Window;
